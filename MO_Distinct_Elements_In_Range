@@ -1,0 +1,75 @@
+class MoDistinct {
+    vector<int> a;
+    vector<int> freq;
+    int distinct = 0;
+    int L = 0, R = -1;
+
+    struct Query {
+        int l, r, idx;
+    };
+
+public:
+    MoDistinct(vector<int>& arr) {
+        a = arr;
+        freq.resize(200005);
+    }
+
+    vector<int> query(vector<pair<int,int>>& ranges) {
+        int n = a.size();
+        int q = ranges.size();
+        int BLOCK = sqrt(n);
+
+        vector<Query> queries(q);
+
+        for (int i = 0; i < q; i++) {
+            queries[i] = {ranges[i].first, ranges[i].second, i};
+        }
+
+        sort(queries.begin(), queries.end(), [&](const Query& x, const Query& y) {
+            int bx = x.l / BLOCK;
+            int by = y.l / BLOCK;
+
+            if (bx != by)
+                return bx < by;
+
+            if (bx & 1)
+                return x.r > y.r;
+
+            return x.r < y.r;
+        });
+
+        vector<int> ans(q);
+
+        auto add = [&](int idx) {
+            if (freq[a[idx]] == 0)
+                distinct++;
+
+            freq[a[idx]]++;
+        };
+
+        auto remove = [&](int idx) {
+            freq[a[idx]]--;
+
+            if (freq[a[idx]] == 0)
+                distinct--;
+        };
+
+        for (auto &query : queries) {
+            while (L > query.l)
+                add(--L);
+
+            while (R < query.r)
+                add(++R);
+
+            while (L < query.l)
+                remove(L++);
+
+            while (R > query.r)
+                remove(R--);
+
+            ans[query.idx] = distinct;
+        }
+
+        return ans;
+    }
+};
