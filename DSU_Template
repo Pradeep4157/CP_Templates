@@ -1,0 +1,52 @@
+struct DSU
+{
+    int n, groups;
+    vector<int> parent, sz;
+ 
+    DSU(int n) : n(n), groups(n), parent(n), sz(n, 1)
+    {
+        iota(parent.begin(), parent.end(), 0);
+    }
+ 
+    int find(int x)
+    {
+        return parent[x] == x ? x : parent[x] = find(parent[x]);
+    }
+ 
+    bool unite(int a, int b)
+    {
+        a = find(a);
+        b = find(b);
+        if (a == b)
+            return false;
+        if (sz[a] < sz[b])
+            swap(a, b);
+        parent[b] = a;
+        sz[a] += sz[b];
+        groups--;
+        return true;
+    }
+ 
+    bool same(int a, int b) { return find(a) == find(b); }
+ 
+    int size(int x) { return sz[find(x)]; }
+ 
+    int countGroups() { return groups; }
+ 
+    vector<vector<int>> getGroups()
+    {
+        vector<vector<int>> res;
+        vector<int> idx(n, -1);
+        for (int i = 0; i < n; i++)
+        {
+            int r = find(i);
+            if (idx[r] == -1)
+            {
+                idx[r] = res.size();
+                res.push_back({});
+            }
+            res[idx[r]].push_back(i);
+        }
+        return res;
+    }
+};
